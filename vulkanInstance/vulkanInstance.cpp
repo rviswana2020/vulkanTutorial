@@ -2,11 +2,19 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+#include <unordered_set>
+#include <string>
 
 // Window name and dimension
 static const uint32_t WIDTH  = 800;
 static const uint32_t HEIGHT = 600;
 static const char *TITLE     = "vulkan";
+
+static const char INTENT_SPACE = '\t';
+static const char * INTENT_STR = "...";
 
 /*------------------------------------------------------------------*/
 // Public interface definition
@@ -22,16 +30,66 @@ HelloTriangleApplication::run() {
 /*------------------------------------------------------------------*/
 // Local helpers
 /*------------------------------------------------------------------*/
-static void
-printGLFWExtensions(const char **glfwExtensions,
-                    uint32_t glfwExtensionCount) {
-    std::cout << "Extension Count: " << glfwExtensionCount << std::endl;
 
-    for(int i = 0; i < glfwExtensionCount; ++i) {
-        std::cout << glfwExtensions[i] << std::endl;
+static void
+printGLFWExtensions(const char **glfwRequiredExtensions,
+                    uint32_t glfwRequiredExtensionCnt) {
+    std::cout << "Extension Count: " << glfwRequiredExtensionCnt << std::endl;
+
+    std::cout << INTENT_STR << "Printing GLFW required Extensions: " << std::endl;
+    for(int i = 0; i < glfwRequiredExtensionCnt; ++i) {
+       std::cout << INTENT_SPACE << INTENT_STR << glfwRequiredExtensions[i] << std::endl;
     }
 }
 
+/*------------------------------------------------------------------*/
+
+static void
+checkGLFWExtensionSupport(const char **glfwRequiredExtensions,
+                          uint32_t glfwRequiredExtensionCnt) {
+
+    // query vulkan for supported extensions
+    uint32_t supportedExtensionCnt = 0;
+    vkEnumerateInstanceExtensionProperties(
+       nullptr,
+       &supportedExtensionCnt,
+       nullptr
+    );
+
+    assert(supportedExtensionCnt > 0);
+
+    // allocate buffer to hold all the names
+    std::vector<VkExtensionProperties> supportedExtensions(supportedExtensionCnt);
+
+    // call again with buffer
+    vkEnumerateInstanceExtensionProperties(
+       nullptr,
+       &supportedExtensionCnt,
+       supportedExtensions.data()
+    );
+
+    // Check required glfw Extensions in vulkan supported extensions
+    std::unordered_set<std::string> supportedExtNameSet;
+    for(auto ext : supportedExtensions) {
+       supportedExtNameSet.emplace(ext.extensionName);
+    }
+
+    // print all names
+    std::cout << INTENT_STR << "vulkan Supported Extensions: "<< std::endl;
+    std::for_each(
+       std::begin(supportedExtNameSet),
+       std::end(supportedExtNameSet),
+       [](auto name){
+          std::cout << INTENT_SPACE << INTENT_STR
+                    << name << std::endl;
+            });
+
+    for(int i = 0; i < glfwRequiredExtensionCnt; ++i) {
+       if(supportedExtNameSet.count(glfwRequiredExtensions[i]) == 0) {
+          throw std::runtime_error("unsupported glfw extensions");
+        }
+    }
+};
 
 /*------------------------------------------------------------------*/
 // Private interface definition
@@ -100,11 +158,13 @@ HelloTriangleApplication::createVkInstance() {
         appInfo.apiVersion = VK_API_VERSION_1_0;
 
     // get glfw's extension names needed to interface with window system
-    uint32_t glfwExtensionCount = 0;
-    const char ** glfwExtensions = nullptr;
+    uint32_t glfwRequiredExtensionCnt = 0;
+    const char ** glfwRequiredExtensions = nullptr;
 
-    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    printGLFWExtensions(glfwExtensions, glfwExtensionCount);
+    glfwRequiredExtensions = glfwGetRequiredInstanceExtensions(&glfwRequiredExtensionCnt);
+
+    printGLFWExtensions(glfwRequiredExtensions, glfwRequiredExtensionCnt);
+    checkGLFWExtensionSupport(glfwRequiredExtensions, glfwRequiredExtensionCnt);
 
     // Create Instance Info structure
     VkInstanceCreateInfo createInfo {};
@@ -135,11 +195,11 @@ HelloTriangleApplication::createVkInstance() {
         createInfo.ppEnabledLayerNames = nullptr;
 
         // count of global extensions to enable
-        createInfo.enabledExtensionCount = glfwExtensionCount;
+        createInfo.enabledExtensionCount = glfwRequiredExtensionCnt;
 
         // nullptr/pointer to array of enabledExtensionCount null-terminated
         // UTF-8 strings containing the names of extension to be enabled
-        createInfo.ppEnabledExtensionNames = glfwExtensions;
+        createInfo.ppEnabledExtensionNames = glfwRequiredExtensions;
 
     //now invoke api to create Vk Instance
     VkResult result = vkCreateInstance(
