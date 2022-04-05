@@ -155,17 +155,17 @@ HelloTriangleApplication::createVulkanInstance() {
         // nullptr/pointer to structure extending this structure
         appInfo.pNext = nullptr;
 
-        // Null terminated UTF-8 application name or nullptr
+        // Null terminated UTF-8 developer supplied application name or nullptr
         appInfo.pApplicationName = "Hello Triangle";
 
-        // unsigned int value for driver supplied application version
+        // unsigned int value for developer supplied application version
         // Version has major(7), minor(10), and patch(12) fields
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 
         // Null terminated UTF-8 engine name or nullptr
         appInfo.pEngineName = "No Engine";
 
-        // unsigned int value for driver supplied engine version
+        // unsigned int value for developer supplied engine version
         // Version has major(7), minor(10), and patch(12) fields
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 

@@ -271,12 +271,12 @@ HelloTriangleApplication::createVulkanInstance() {
 
         //count of global layers to enable
         // here "global" applies to the entire application
-        createInfo.enabledLayerCount = 0;
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayer.size());
 
         // nullptr/pointer to array of enabledLayerCount null-terminated
         // UTF-8 strings containing the name of the layers to enable during
         // create instance
-        createInfo.ppEnabledLayerNames = nullptr;
+        createInfo.ppEnabledLayerNames = validationLayer.data();
 
         // count of global extentions to enable
         createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExt.size());
@@ -319,6 +319,14 @@ HelloTriangleApplication::mainLoop() {
 
 void
 HelloTriangleApplication::cleanup() {
+
+    // All other vulkan objects should be released before this!!!
+    // destroy instance
+    vkDestroyInstance(
+        instance,       // handle to instance object
+        nullptr         // host memory allocator
+    );
+
     // destroy window
     glfwDestroyWindow(window);
 
