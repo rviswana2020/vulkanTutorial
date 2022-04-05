@@ -18,12 +18,14 @@ class HelloTriangleApplication {
 
     private:
         void initWindow();              // glfw window init code
+        void createVulkanInstance();    // vulkan instance creation code
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/reelase all glfw/vulkan objects
 
     private:
         GLFWwindow *window = nullptr;   // screen to render images
+        VkInstance instance;            // vulkan instance
 };
 
 /*------------------------------------------------------------------*/
