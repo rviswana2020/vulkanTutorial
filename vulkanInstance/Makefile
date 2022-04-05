@@ -4,11 +4,10 @@ LDFLAGS = -lglfw -lvulkan
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
-	CXXFLAGS += -DDEBUG
+	CXXFLAGS += -DDEBUG -g
 else
 	CXXFLAGS += -DNDEBUG
 endif
-
 
 vulkanInstance: vulkanInstance.cpp
 	$(info $(CXXFLAGS))

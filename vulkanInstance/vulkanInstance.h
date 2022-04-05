@@ -1,3 +1,5 @@
+#pragma once
+
 #define GLFW_INCLUDE_VULKAN     // enble glfw to include vulkan header
 #include <GLFW/glfw3.h>
 
@@ -15,7 +17,7 @@ class HelloTriangleApplication {
 
     private:
         void initWindow();            // glfw window init code
-        void createVkInstance();      // vulkan instance code
+        void createVulkanInstance();  // vulkan instance creation code
         void initVulkan();            // vulkan init code
         void mainLoop();              // main rendering loop
         void cleanup();               // cleanup/release all glfw/vulkan objects

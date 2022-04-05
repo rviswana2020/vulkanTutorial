@@ -2,11 +2,12 @@
 
 #include <iostream>		// console reporting
 #include <stdexcept>	// error handling
-#include <cstdlib>		// return macro definition
+#include <cstdlib>		// EXIT macro definitions
 
 /*------------------------------------------------------------------*/
 
-int main() {
+int
+main() {
     HelloTriangleApplication app;
 
     try {

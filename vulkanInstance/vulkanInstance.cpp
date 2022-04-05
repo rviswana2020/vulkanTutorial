@@ -145,7 +145,7 @@ HelloTriangleApplication::initWindow() {
 //   - Additional extention and use of any validation layer
 
 void
-HelloTriangleApplication::createVkInstance() {
+HelloTriangleApplication::createVulkanInstance() {
     // Info about application -- optional
     VkApplicationInfo appInfo {};
 
@@ -231,7 +231,7 @@ HelloTriangleApplication::createVkInstance() {
 void
 HelloTriangleApplication::initVulkan() {
    initWindow();
-   createVkInstance();
+   createVulkanInstance();
 }
 
 /*------------------------------------------------------------------*/

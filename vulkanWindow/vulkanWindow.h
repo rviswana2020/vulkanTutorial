@@ -1,3 +1,4 @@
+#pragma once
 #define GLFW_INCLUDE_VULKAN     // enble glfw to include vulkan header
 #include <GLFW/glfw3.h>
 
