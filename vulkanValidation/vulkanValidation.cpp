@@ -1,6 +1,10 @@
 #include "vulkanValidation.h"
 
 #include <iostream>
+#include <vector>
+#include <string>
+#include <cassert>
+#include <unordered_set>
 
 /*------------------------------------------------------------------*/
 // Constants
@@ -22,6 +26,93 @@ HelloTriangleApplication::run() {
     initVulkan();
     mainLoop();
     cleanup();
+}
+
+/*------------------------------------------------------------------*/
+// Local Helpers
+/*------------------------------------------------------------------*/
+
+template<typename T>
+static void
+printExtensions(std::vector<T> & extensions, const char * header) {
+    std::cout << INTENT_STR << "Printing " << header << std::endl;
+    for(auto name : extensions) {
+        std::cout << INTENT_SPACE << INTENT_STR << name << std::endl;
+    }
+}
+
+/*------------------------------------------------------------------*/
+
+std::vector<std::string>
+getSupportedExtensions() {
+    uint32_t supportedExtCount = 0;
+
+    vkEnumerateInstanceExtensionProperties(
+        nullptr,
+        &supportedExtCount,
+        nullptr
+    );
+
+    assert(supportedExtCount > 0);
+
+    // allocate buffer to hold all names
+    std::vector<VkExtensionProperties> supportedExtProperties(supportedExtCount);
+
+    // call again but with buffer to get all properties
+    vkEnumerateInstanceExtensionProperties(
+        nullptr,
+        &supportedExtCount,
+        supportedExtProperties.data()
+    );
+
+    std::vector<std::string> supportedExtNames;
+
+    for(auto &property : supportedExtProperties) {
+        supportedExtNames.emplace_back(property.extensionName);
+    }
+
+    return supportedExtNames;
+}
+
+/*------------------------------------------------------------------*/
+
+static void
+checkGLFWExtensionSupport(std::vector<const char *> &reqExt,
+                          std::vector<std::string> supportedExt) {
+
+    std::unordered_set<std::string> supportedExtSet(supportedExt.begin(), supportedExt.end());
+    for(auto ext : reqExt) {
+        if(supportedExtSet.count(ext) == 0) {
+            throw std::runtime_error("required extension not supported !!!!");
+        }
+    }
+}
+
+/*------------------------------------------------------------------*/
+
+static std::vector<const char *>
+getRequiredExtensions() {
+    uint32_t glfwRequiredExtCount = 0;
+    const char ** glfwRequiredExtensions;
+
+    glfwRequiredExtensions = glfwGetRequiredInstanceExtensions(
+                                    &glfwRequiredExtCount);
+
+    std::vector<const char *> requiredExtensions(
+                                glfwRequiredExtensions,
+                                glfwRequiredExtensions + glfwRequiredExtCount);
+
+    assert(glfwRequiredExtCount > 0);
+
+    #ifndef NDEBUG
+        printExtensions(requiredExtensions, "Required Extension Names");
+
+        auto supportedExtensions = getSupportedExtensions();
+        printExtensions(supportedExtensions, "Supported Extension Names");
+
+        checkGLFWExtensionSupport(requiredExtensions, supportedExtensions);
+    #endif
+    return requiredExtensions;
 }
 
 /*------------------------------------------------------------------*/
@@ -86,6 +177,9 @@ HelloTriangleApplication::createVulkanInstance() {
         // calls VK_MAKE_API_VERSION(0, 1, 0, 0);
         appInfo.apiVersion = VK_API_VERSION_1_0;
 
+    // get required glfw extensions
+    auto requiredExt = getRequiredExtensions();
+
     // create Instance Info structure
     VkInstanceCreateInfo createInfo {};
 
@@ -111,12 +205,11 @@ HelloTriangleApplication::createVulkanInstance() {
         createInfo.ppEnabledLayerNames = nullptr;
 
         // count of global extentions to enable
-        createInfo.enabledExtensionCount = 0;
-
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExt.size());
         // nullptr/pointer to array of enabledLayerCount null-terminated
         // UTF-8 strings containing the name of the extensions to enable during
         // create instance
-        createInfo.ppEnabledExtensionNames = nullptr;
+        createInfo.ppEnabledExtensionNames = requiredExt.data();
 
     // invoke api to create vulkan instance
     VkResult result = vkCreateInstance(
@@ -136,6 +229,7 @@ HelloTriangleApplication::createVulkanInstance() {
 void
 HelloTriangleApplication::initVulkan() {
     initWindow();
+    createVulkanInstance();
 }
 
 /*------------------------------------------------------------------*/
