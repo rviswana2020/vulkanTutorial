@@ -20,3 +20,8 @@ test: vulkanValidation
 
 clean:
 	rm -rf vulkanValidation
+
+#USAGE:
+### make clean; 
+### make DEBUG=0 test
+### make DEBUG=1 test

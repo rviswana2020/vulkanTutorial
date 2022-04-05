@@ -34,7 +34,7 @@ HelloTriangleApplication::run() {
 
 template<typename T>
 static void
-printExtensions(std::vector<T> & extensions, const char * header) {
+printNames(std::vector<T> & extensions, const char * header) {
     std::cout << INTENT_STR << "Printing " << header << std::endl;
     for(auto name : extensions) {
         std::cout << INTENT_SPACE << INTENT_STR << name << std::endl;
@@ -71,21 +71,77 @@ getSupportedExtensions() {
         supportedExtNames.emplace_back(property.extensionName);
     }
 
+    #ifndef NDEBUG
+        printNames(supportedExtNames, "Supported Extension Names");
+    #endif
+
     return supportedExtNames;
 }
 
 /*------------------------------------------------------------------*/
 
-static void
+static bool
 checkGLFWExtensionSupport(std::vector<const char *> &reqExt,
                           std::vector<std::string> supportedExt) {
 
     std::unordered_set<std::string> supportedExtSet(supportedExt.begin(), supportedExt.end());
     for(auto ext : reqExt) {
         if(supportedExtSet.count(ext) == 0) {
-            throw std::runtime_error("required extension not supported !!!!");
+           return false;
         }
     }
+    return true;
+}
+
+/*------------------------------------------------------------------*/
+
+static std::vector<std::string>
+getSupportedValidationLayerNames() {
+
+    uint32_t layerCnt = 0;
+
+    vkEnumerateInstanceLayerProperties(
+                    &layerCnt,
+                    nullptr
+                    );
+
+    // allocate buffer to hold layer names
+    std::vector<VkLayerProperties> availableLayers(layerCnt);
+
+    // call again but with buffer to get all layer names
+    vkEnumerateInstanceLayerProperties(
+                    &layerCnt,
+                    availableLayers.data()
+                    );
+
+    std::vector<std::string> layerNames;
+
+    for(auto & property : availableLayers) {
+        layerNames.emplace_back(property.layerName);
+    }
+
+    #ifndef NDEBUG
+        printNames(layerNames, "Available Layer Names");
+    #endif
+    return layerNames;
+}
+
+/*------------------------------------------------------------------*/
+
+static bool
+checkValidationLayerSupport(std::vector<const char *> & reqLayers,
+                            std::vector<std::string> & availableLayers) {
+
+    std::unordered_set availableLayersSet(
+                availableLayers.begin(), availableLayers.end());
+
+    for(auto & reqLayerName : reqLayers) {
+        if(availableLayersSet.count(reqLayerName) == 0) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /*------------------------------------------------------------------*/
@@ -105,13 +161,9 @@ getRequiredExtensions() {
     assert(glfwRequiredExtCount > 0);
 
     #ifndef NDEBUG
-        printExtensions(requiredExtensions, "Required Extension Names");
-
-        auto supportedExtensions = getSupportedExtensions();
-        printExtensions(supportedExtensions, "Supported Extension Names");
-
-        checkGLFWExtensionSupport(requiredExtensions, supportedExtensions);
+        printNames(requiredExtensions, "Required Extension Names");
     #endif
+
     return requiredExtensions;
 }
 
@@ -179,6 +231,28 @@ HelloTriangleApplication::createVulkanInstance() {
 
     // get required glfw extensions
     auto requiredExt = getRequiredExtensions();
+
+    // construct validation layer name array
+    std::vector<const char *> validationLayer = {
+        "VK_LAYER_KHRONOS_validation"
+    };
+
+    #ifndef NDEBUG
+        auto supportedExt = getSupportedExtensions();
+        auto status = checkGLFWExtensionSupport(requiredExt, supportedExt);
+        if(!status) {
+            throw std::runtime_error("required extensions are not supported");
+        }
+
+        auto availableLayerNames = getSupportedValidationLayerNames();
+
+        status = checkValidationLayerSupport(validationLayer, availableLayerNames);
+
+        if(!status) {
+            throw std::runtime_error("Validation layers requested, but unavailable");
+        }
+
+    #endif
 
     // create Instance Info structure
     VkInstanceCreateInfo createInfo {};
