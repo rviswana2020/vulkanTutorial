@@ -56,42 +56,42 @@ printNames(std::vector<T> & extensions, const char * header) {
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback( VkDebugUtilsMessageSeverityFlagBitsEXT msgSeverity,
-			   VkDebugUtilsMessageTypeFlagsEXT msgType,
-			   const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-			   void *pUserData) {
-	std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
-	return VK_FALSE;
+               VkDebugUtilsMessageTypeFlagsEXT msgType,
+               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+               void *pUserData) {
+    std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
+    return VK_FALSE;
 }
 
 /*------------------------------------------------------------------*/
 
 static void
 populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT & createInfo) {
-	createInfo = {};
+    createInfo = {};
 
-	// structure type
-	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    // structure type
+    createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
-	// nullptr/pointer to a structure extending this structure
-	createInfo.pNext = nullptr;
+    // nullptr/pointer to a structure extending this structure
+    createInfo.pNext = nullptr;
 
-	// flags is 0 and reserved for future use
-	createInfo.flags = 0;
+    // flags is 0 and reserved for future use
+    createInfo.flags = 0;
 
-	// specify the severity of events will cause this callback to be called
-	createInfo.messageSeverity =
-		VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    // specify the severity of events will cause this callback to be called
+    createInfo.messageSeverity =
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 
-	// specify the type of events that will call this callback to be called
-	createInfo.messageType = 
-		VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-	
-	// register callback that will be called
-	createInfo.pfnUserCallback = debugCallback;
+    // specify the type of events that will call this callback to be called
+    createInfo.messageType =
+        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    
+    // register callback that will be called
+    createInfo.pfnUserCallback = debugCallback;
 
 }
 
@@ -99,43 +99,43 @@ populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT & createInfo
 
 static VkResult
 createDebugUtilsMessengerEXT(
-        VkInstance &instance, 
+        VkInstance &instance,
         const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
         const VkAllocationCallbacks *pAllocator,
         VkDebugUtilsMessengerEXT *pDebugMessenger) {
 
-	VkResult result = VK_ERROR_EXTENSION_NOT_PRESENT;
+    VkResult result = VK_ERROR_EXTENSION_NOT_PRESENT;
 
-	// get proc address of vkCreateDebugUtilsMessengerEXT and invoke
-	auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
+    // get proc address of vkCreateDebugUtilsMessengerEXT and invoke
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
                         instance,
-						"vkCreateDebugUtilsMessengerEXT");
+                        "vkCreateDebugUtilsMessengerEXT");
 
-	if(func != nullptr) {
-		VkResult result = func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-	}
+    if(func != nullptr) {
+        result = func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    }
 
     return result;
-}        
+}
 
 /*------------------------------------------------------------------*/
 
 static void
 destroyDebugUtilsMessengerEXT(
-        VkInstance &instance, 
+        VkInstance &instance,
         VkDebugUtilsMessengerEXT debugMessenger,
         const VkAllocationCallbacks *pAllocator) {
 
-	// get proc address of vkCreateDebugUtilsMessengerEXT and invoke
-	auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
+    // get proc address of vkCreateDebugUtilsMessengerEXT and invoke
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
                         instance,
-						"vkDestroyDebugUtilsMessengerEXT");
+                        "vkDestroyDebugUtilsMessengerEXT");
 
-	if(func != nullptr) {
-		func(instance, debugMessenger, pAllocator);
-	}
+    if(func != nullptr) {
+        func(instance, debugMessenger, pAllocator);
+    }
 
-}        
+}
 
 /*------------------------------------------------------------------*/
 
@@ -256,11 +256,11 @@ getRequiredExtensions() {
 
     assert(glfwRequiredExtCount > 0);
 
-	// add optional message callback
-	if(enableValidationLayers) {
-		requiredExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    // add optional message callback
+    if(enableValidationLayers) {
+        requiredExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         printNames(requiredExtensions, "Required Extension Names");
-	}
+    }
 
     return requiredExtensions;
 }
@@ -298,19 +298,19 @@ HelloTriangleApplication::initWindow() {
 
 void
 HelloTriangleApplication::setupDebugMessenger() {
-	if(!enableValidationLayers)
-		return;
+    if(!enableValidationLayers)
+        return;
 
-	VkDebugUtilsMessengerCreateInfoEXT createInfo {};
+    VkDebugUtilsMessengerCreateInfoEXT createInfo {};
 
-	populateDebugMessengerCreateInfo(createInfo);
+    populateDebugMessengerCreateInfo(createInfo);
     VkResult result = createDebugUtilsMessengerEXT(instance,
-												   &createInfo, 
-												   nullptr, 
+                                                   &createInfo,
+                                                   nullptr,
                                                    &debugMessenger);
 
-	if(result != VK_SUCCESS) {
-		std::cout << "debug Messenger callback error: " << result << std::endl;
+    if(result != VK_SUCCESS) {
+        std::cout << "debug Messenger callback error: " << result << std::endl;
         throw std::runtime_error("cannot create debug utils callback");
     }
 }
@@ -351,7 +351,7 @@ HelloTriangleApplication::createVulkanInstance() {
     // get required glfw extensions
     auto requiredExt = getRequiredExtensions();
 
-	if(enableValidationLayers) {
+    if(enableValidationLayers) {
         auto supportedExt = getSupportedExtensions();
         auto status = checkGLFWExtensionSupport(requiredExt, supportedExt);
         if(!status) {
@@ -366,10 +366,10 @@ HelloTriangleApplication::createVulkanInstance() {
             throw std::runtime_error("Validation layers requested, but unavailable");
         }
 
-	}
+    }
 
     // create Instance Info structure
-	VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo {};
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo {};
     VkInstanceCreateInfo createInfo {};
 
         // structure type
@@ -384,22 +384,22 @@ HelloTriangleApplication::createVulkanInstance() {
         // nullptr/pointer to VkApplicationInfo object
         createInfo.pApplicationInfo = &appInfo;
 
-		if(enableValidationLayers) {
-        	//count of global layers to enable
-       		// here "global" applies to the entire application
-        	createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayer.size());
+        if(enableValidationLayers) {
+            //count of global layers to enable
+               // here "global" applies to the entire application
+            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayer.size());
 
-        	// nullptr/pointer to array of enabledLayerCount null-terminated
-        	// UTF-8 strings containing the name of the layers to enable during
-        	// create instance
-        	createInfo.ppEnabledLayerNames = validationLayer.data();
-			populateDebugMessengerCreateInfo(debugCreateInfo);
-			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
-		}
-		else {
-        	createInfo.enabledLayerCount = 0;
-        	createInfo.ppEnabledLayerNames = nullptr;
-		}
+            // nullptr/pointer to array of enabledLayerCount null-terminated
+            // UTF-8 strings containing the name of the layers to enable during
+            // create instance
+            createInfo.ppEnabledLayerNames = validationLayer.data();
+            populateDebugMessengerCreateInfo(debugCreateInfo);
+            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;
+        }
+        else {
+            createInfo.enabledLayerCount = 0;
+            createInfo.ppEnabledLayerNames = nullptr;
+        }
 
         // count of global extentions to enable
         createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExt.size());
@@ -427,7 +427,7 @@ void
 HelloTriangleApplication::initVulkan() {
     initWindow();
     createVulkanInstance();
-	setupDebugMessenger();
+    setupDebugMessenger();
 }
 
 /*------------------------------------------------------------------*/
@@ -444,10 +444,10 @@ HelloTriangleApplication::mainLoop() {
 void
 HelloTriangleApplication::cleanup() {
 
-	// destroy debug Messenger callback
-	if(enableValidationLayers) {
-		destroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-	}
+    // destroy debug Messenger callback
+    if(enableValidationLayers) {
+        destroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+    }
 
     // All other vulkan objects should be released before this!!!
     // destroy instance
