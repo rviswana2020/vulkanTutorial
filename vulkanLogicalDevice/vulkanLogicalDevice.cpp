@@ -29,6 +29,18 @@ static const char * TITLE       = "Hello Triangle Application";
 #endif
 
 /*------------------------------------------------------------------*/
+// Classes
+/*------------------------------------------------------------------*/
+
+struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+
+    bool isComplete() const {
+        return graphicsFamily.has_value();
+    }
+};
+
+/*------------------------------------------------------------------*/
 // Public inferface definitions
 /*------------------------------------------------------------------*/
 
@@ -273,6 +285,42 @@ isDeviceSuitable(VkPhysicalDevice & device) {
 }
 
 /*------------------------------------------------------------------*/
+
+static QueueFamilyIndices
+findQueueFamilies(VkPhysicalDevice &device) {
+    QueueFamilyIndices indices;
+
+    // let us get Queue family properties
+    uint32_t qFamilyCnt = 0;
+
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &qFamilyCnt, nullptr);
+
+    if(qFamilyCnt == 0) {
+        throw std::runtime_error("No queue family properties found");
+    }
+
+    // allocate buffer to hold queue family properties
+    std::vector<VkQueueFamilyProperties> qFamilies(qFamilyCnt);
+
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &qFamilyCnt, qFamilies.data());
+
+    // Let us iterate over queue families and check if it works for our needs
+
+    for(size_t i = 0; i < qFamilies.size(); ++i) {
+        if(qFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphicsFamily = i;
+        }
+
+        if(indices.isComplete()) {
+            break;
+        }
+    }
+
+    return indices;
+}
+
+/*------------------------------------------------------------------*/
+
 static void printDeviceSpecification(VkPhysicalDevice &device) {
     VkPhysicalDeviceProperties deviceProperties;
 
@@ -304,8 +352,6 @@ static void printDeviceSpecification(VkPhysicalDevice &device) {
     std::cout << INTENT_SPACE << INTENT_STR
               << "Shader Int64 :" << deviceFeatures.shaderInt64 << std::endl;
 }
-
-/*------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------*/
 // Private inferface definitions
