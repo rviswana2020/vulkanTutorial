@@ -14,8 +14,8 @@ static const char INTENT_SPACE     = '\t';
 static const char * INTENT_STR     = "...";
 
 static const uint32_t WIDTH     = 800;
-static const uint32_t HEIGHT     = 600;
-static const char * TITLE        = "Hello Triangle Application";
+static const uint32_t HEIGHT    = 600;
+static const char * TITLE       = "Hello Triangle Application";
 
     // construct validation layer name array
     std::vector<const char *> validationLayer = {
@@ -23,9 +23,9 @@ static const char * TITLE        = "Hello Triangle Application";
     };
 
 #ifdef NDEBUG
-const bool enableValidationLayers = false;
+    const bool enableValidationLayers = false;
 #else
-const bool enableValidationLayers = true;
+    const bool enableValidationLayers = true;
 #endif
 
 /*------------------------------------------------------------------*/
@@ -266,6 +266,48 @@ getRequiredExtensions() {
 }
 
 /*------------------------------------------------------------------*/
+
+static bool
+isDeviceSuitable(VkPhysicalDevice & device) {
+    return true;
+}
+
+/*------------------------------------------------------------------*/
+static void printDeviceSpecification(VkPhysicalDevice &device) {
+    VkPhysicalDeviceProperties deviceProperties;
+
+    //get all device properties
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+    VkPhysicalDeviceFeatures deviceFeatures;
+
+    // print them
+    std::cout << INTENT_STR << "Current Device Property: " << std::endl;
+    std::cout << INTENT_SPACE << INTENT_STR
+              << "Device Name: " << deviceProperties.deviceName << std::endl;
+    std::cout << INTENT_SPACE << INTENT_STR
+              << "Device VendorID: " << deviceProperties.vendorID << std::endl;
+    std::cout << INTENT_SPACE << INTENT_STR
+              << "Device Type: " << deviceProperties.deviceType << std::endl;
+
+    // get all device features
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+    // print them
+    std::cout << INTENT_STR << "Current Device Features: " << std::endl;
+    std::cout << INTENT_SPACE << INTENT_STR
+              << "Geometry Shader :" << deviceFeatures.geometryShader << std::endl;
+
+    std::cout << INTENT_SPACE << INTENT_STR
+              << "Shader Float64 :" << deviceFeatures.shaderFloat64 << std::endl;
+
+    std::cout << INTENT_SPACE << INTENT_STR
+              << "Shader Int64 :" << deviceFeatures.shaderInt64 << std::endl;
+}
+
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
 // Private inferface definitions
 /*------------------------------------------------------------------*/
 
@@ -424,10 +466,47 @@ HelloTriangleApplication::createVulkanInstance() {
 /*------------------------------------------------------------------*/
 
 void
+HelloTriangleApplication::pickPhysicalDevice() {
+    // enumerate supported physical system
+    uint32_t deviceCnt = 0;
+
+    // invoke vkEnumeratePhysicalDevice to get the count
+    vkEnumeratePhysicalDevices(instance, &deviceCnt, nullptr);
+
+    if(deviceCnt == 0) {
+        throw std::runtime_error("failed to find GPUs with vulkan support!");
+    }
+
+    // allocate memory
+    std::vector<VkPhysicalDevice> devices(deviceCnt);
+
+    // get the device list
+    vkEnumeratePhysicalDevices(instance, &deviceCnt, devices.data());
+
+    for(auto & device : devices) {
+        #ifndef NDEBUG
+            printDeviceSpecification(device);
+        #endif
+
+        if(isDeviceSuitable(device)) {
+            physicalDevice = device;
+            break;
+        }
+    }
+
+    if(physicalDevice == VK_NULL_HANDLE) {
+        throw std::runtime_error("no suitable GPU found");
+    }
+}
+
+/*------------------------------------------------------------------*/
+
+void
 HelloTriangleApplication::initVulkan() {
     initWindow();
     createVulkanInstance();
     setupDebugMessenger();
+    pickPhysicalDevice();
 }
 
 /*------------------------------------------------------------------*/

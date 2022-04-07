@@ -20,14 +20,17 @@ class HelloTriangleApplication {
         void initWindow();              // glfw window init code
         void setupDebugMessenger();     // debug messenger setup code
         void createVulkanInstance();    // vulkan instance creation code
+        void pickPhysicalDevice();      // vulkan physical device code
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
 
     private:
         GLFWwindow *window = nullptr;            // screen to render images
-        VkInstance instance;                     // vulkan instance
-        VkDebugUtilsMessengerEXT debugMessenger; // debug callback handle
+        // debug callback handle
+        VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
+        VkInstance instance = VK_NULL_HANDLE;    // vulkan instance
+        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;   
 };
 
 /*------------------------------------------------------------------*/
