@@ -510,6 +510,15 @@ HelloTriangleApplication::createVulkanInstance() {
 }
 
 /*------------------------------------------------------------------*/
+void
+HelloTriangleApplication::createSurface() {
+    VkResult result = glfwCreateWindowSurface(instance, window, nullptr, &surface);
+    if(result != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create window surface!");
+    }
+}
+
+/*------------------------------------------------------------------*/
 
 void
 HelloTriangleApplication::pickPhysicalDevice() {
@@ -643,6 +652,7 @@ HelloTriangleApplication::initVulkan() {
     initWindow();
     createVulkanInstance();
     setupDebugMessenger();
+    createSurface();
     pickPhysicalDevice();
     createLogicalDevice();
 }
@@ -668,6 +678,8 @@ HelloTriangleApplication::cleanup() {
     if(enableValidationLayers) {
         destroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
     }
+
+    vkDestroySurfaceKHR(instance, surface, nullptr);
 
     // All other vulkan objects should be released before this!!!
     // destroy instance

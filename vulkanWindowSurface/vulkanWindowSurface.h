@@ -22,6 +22,7 @@ class HelloTriangleApplication {
         void createVulkanInstance();    // vulkan instance creation code
         void pickPhysicalDevice();      // vulkan physical device code
         void createLogicalDevice();     // vulkan logical device code
+        void createSurface();           // vulkan surface creation code
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
@@ -34,6 +35,7 @@ class HelloTriangleApplication {
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice device = VK_NULL_HANDLE;
         VkQueue graphicsQueue = VK_NULL_HANDLE;  //opaque handle to queue object
+        VkSurfaceKHR surface = VK_NULL_HANDLE;
 };
 
 /*------------------------------------------------------------------*/
