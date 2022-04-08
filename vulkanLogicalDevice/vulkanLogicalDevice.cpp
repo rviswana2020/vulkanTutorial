@@ -548,11 +548,103 @@ HelloTriangleApplication::pickPhysicalDevice() {
 /*------------------------------------------------------------------*/
 
 void
+HelloTriangleApplication::createLogicalDevice() {
+
+    // find the queue family
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+
+    // queue priority value
+    float queuePriority = 1.0f;
+
+    // Populate VkDeviceQueueCreateInfo structure
+    VkDeviceQueueCreateInfo qCreateInfo {};
+
+        // structure type
+        qCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+
+        // nullpr/pointer to structure that extends this structure
+        qCreateInfo.pNext = nullptr;
+
+        // flags indicating the behavior of the queue
+        qCreateInfo.flags = 0;
+
+        // queue family Index
+        qCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+
+        // how many queues to create in the queue family
+        qCreateInfo.queueCount = 1;
+
+        // normalized floating point values, specifying priorities of
+        // work to be submitted to each created queue
+        qCreateInfo.pQueuePriorities = &queuePriority;
+
+    // Specifying about device features
+    // for now, just leave it at the default initialized state
+    VkPhysicalDeviceFeatures deviceFeatures {};
+
+    // create logical device
+    VkDeviceCreateInfo createInfo {};
+
+        // structure type
+        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+        // nullptr/pointer to structure that extends this structure
+        createInfo.pNext = nullptr;
+
+        // flags reserved for future use
+        createInfo.flags = 0;
+
+        // count of VkDeviceQueueCreateInfo
+        createInfo.queueCreateInfoCount = 1;
+
+        // pointer to arrays of VkDevieQueueCreateInfo structures describing
+        // the queues that are requested to be created along with the
+        // logical device.
+        createInfo.pQueueCreateInfos = &qCreateInfo;
+
+        if(enableValidationLayers) {
+            // global validation layer count -- decrecated
+            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayer   .size());
+
+            // global validation layer names -- deprecated
+            createInfo.ppEnabledLayerNames = validationLayer.data();
+        }
+        else  {
+            createInfo.enabledLayerCount = 0;
+            createInfo.ppEnabledLayerNames = nullptr;
+        }
+
+        // global extension count -- deprecated
+        createInfo.enabledExtensionCount = 0;
+
+        // global extension names -- deprecated
+        createInfo.ppEnabledExtensionNames = nullptr;
+
+        // strucure containing boolean indicators of all of the features
+        // to be enabled
+        createInfo.pEnabledFeatures = &deviceFeatures;
+
+        VkResult result = vkCreateDevice(physicalDevice, &createInfo,
+                                         nullptr, &device);
+
+        if(result != VK_SUCCESS) {
+            throw std::runtime_error("failed to create logical device!");
+        }
+
+		// get created queue handle
+		vkGetDeviceQueue(device, indices.graphicsFamily.value(),
+                         0, &graphicsQueue);
+}
+
+/*------------------------------------------------------------------*/
+
+void
 HelloTriangleApplication::initVulkan() {
     initWindow();
     createVulkanInstance();
     setupDebugMessenger();
     pickPhysicalDevice();
+    createLogicalDevice();
 }
 
 /*------------------------------------------------------------------*/
@@ -568,6 +660,9 @@ HelloTriangleApplication::mainLoop() {
 
 void
 HelloTriangleApplication::cleanup() {
+
+    // Destroy logical device
+    vkDestroyDevice(device, nullptr);
 
     // destroy debug Messenger callback
     if(enableValidationLayers) {

@@ -21,6 +21,7 @@ class HelloTriangleApplication {
         void setupDebugMessenger();     // debug messenger setup code
         void createVulkanInstance();    // vulkan instance creation code
         void pickPhysicalDevice();      // vulkan physical device code
+        void createLogicalDevice();     // vulkan logical device code
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
@@ -30,7 +31,9 @@ class HelloTriangleApplication {
         // debug callback handle
         VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
         VkInstance instance = VK_NULL_HANDLE;    // vulkan instance
-        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;   
+        VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+        VkDevice device = VK_NULL_HANDLE;
+        VkQueue graphicsQueue = VK_NULL_HANDLE;  //opaque handle to queue object
 };
 
 /*------------------------------------------------------------------*/
