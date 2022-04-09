@@ -5,6 +5,7 @@
 #include <string>
 #include <cassert>
 #include <unordered_set>
+#include <set>
 
 /*------------------------------------------------------------------*/
 // Constants
@@ -34,9 +35,10 @@ static const char * TITLE       = "Hello Triangle Application";
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentFamily;
 
     bool isComplete() const {
-        return graphicsFamily.has_value();
+        return graphicsFamily.has_value() && presentFamily.has_value();
     }
 };
 
@@ -287,7 +289,7 @@ isDeviceSuitable(VkPhysicalDevice & device) {
 /*------------------------------------------------------------------*/
 
 static QueueFamilyIndices
-findQueueFamilies(VkPhysicalDevice &device) {
+findQueueFamilies(VkPhysicalDevice &device, VkSurfaceKHR &surface) {
     QueueFamilyIndices indices;
 
     // let us get Queue family properties
@@ -311,7 +313,21 @@ findQueueFamilies(VkPhysicalDevice &device) {
             indices.graphicsFamily = i;
         }
 
+        // find presentation family
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i , surface, &presentSupport);
+
+        if(presentSupport) {
+            indices.presentFamily = i;
+        }
+
         if(indices.isComplete()) {
+            std::cout << "graphics family: " << indices.graphicsFamily.value()
+                      << std::endl;
+
+            std::cout << "present family: " << indices.presentFamily.value()
+                      << std::endl;
+
             break;
         }
     }
@@ -560,32 +576,39 @@ void
 HelloTriangleApplication::createLogicalDevice() {
 
     // find the queue family
-    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
 
     // queue priority value
     float queuePriority = 1.0f;
 
     // Populate VkDeviceQueueCreateInfo structure
-    VkDeviceQueueCreateInfo qCreateInfo {};
+    std::vector<VkDeviceQueueCreateInfo> qCreateInfos;
+    std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(),
+                                              indices.presentFamily.value()
+                                             };
 
-        // structure type
-        qCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    for(uint32_t queueFamily : uniqueQueueFamilies) {
+        VkDeviceQueueCreateInfo qCreateInfo {};
+            // structure type
+           qCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 
-        // nullpr/pointer to structure that extends this structure
-        qCreateInfo.pNext = nullptr;
+            // nullpr/pointer to structure that extends this structure
+            qCreateInfo.pNext = nullptr;
 
-        // flags indicating the behavior of the queue
-        qCreateInfo.flags = 0;
+            // flags indicating the behavior of the queue
+            qCreateInfo.flags = 0;
 
-        // queue family Index
-        qCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+            // queue family Index
+            qCreateInfo.queueFamilyIndex = queueFamily;
 
-        // how many queues to create in the queue family
-        qCreateInfo.queueCount = 1;
+            // how many queues to create in the queue family
+            qCreateInfo.queueCount = 1;
 
-        // normalized floating point values, specifying priorities of
-        // work to be submitted to each created queue
-        qCreateInfo.pQueuePriorities = &queuePriority;
+            // normalized floating point values, specifying priorities of
+            // work to be submitted to each created queue
+            qCreateInfo.pQueuePriorities = &queuePriority;
+            qCreateInfos.emplace_back(qCreateInfo);
+    }
 
     // Specifying about device features
     // for now, just leave it at the default initialized state
@@ -604,12 +627,12 @@ HelloTriangleApplication::createLogicalDevice() {
         createInfo.flags = 0;
 
         // count of VkDeviceQueueCreateInfo
-        createInfo.queueCreateInfoCount = 1;
+        createInfo.queueCreateInfoCount = static_cast<uint32_t>(qCreateInfos.size());
 
         // pointer to arrays of VkDevieQueueCreateInfo structures describing
         // the queues that are requested to be created along with the
         // logical device.
-        createInfo.pQueueCreateInfos = &qCreateInfo;
+        createInfo.pQueueCreateInfos = qCreateInfos.data();
 
         if(enableValidationLayers) {
             // global validation layer count -- decrecated
@@ -640,9 +663,12 @@ HelloTriangleApplication::createLogicalDevice() {
             throw std::runtime_error("failed to create logical device!");
         }
 
-		// get created queue handle
-		vkGetDeviceQueue(device, indices.graphicsFamily.value(),
+        // get created queue handles
+        vkGetDeviceQueue(device, indices.graphicsFamily.value(),
                          0, &graphicsQueue);
+
+        vkGetDeviceQueue(device, indices.presentFamily.value(),
+                         0, &presentQueue);
 }
 
 /*------------------------------------------------------------------*/

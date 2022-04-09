@@ -35,6 +35,7 @@ class HelloTriangleApplication {
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
         VkDevice device = VK_NULL_HANDLE;
         VkQueue graphicsQueue = VK_NULL_HANDLE;  //opaque handle to queue object
+        VkQueue presentQueue = VK_NULL_HANDLE;  //opaque handle to queue object
         VkSurfaceKHR surface = VK_NULL_HANDLE;
 };
 
