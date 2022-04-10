@@ -25,6 +25,7 @@ class HelloTriangleApplication {
         void createLogicalDevice();     // vulkan logical device code
         void createSurface();           // vulkan surface creation code
         void createSwapchain();         // vulkan swapchain code
+        void createImageViews();
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
@@ -43,6 +44,7 @@ class HelloTriangleApplication {
         std::vector<VkImage> swapchainImages;
         VkFormat swapchainImageFormat;
         VkExtent2D swapchainExtent;
+        std::vector<VkImageView> swapchainImageViews;
 };
 
 /*------------------------------------------------------------------*/
