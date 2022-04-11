@@ -46,6 +46,7 @@ class HelloTriangleApplication {
         VkFormat swapchainImageFormat;
         VkExtent2D swapchainExtent;
         std::vector<VkImageView> swapchainImageViews;
+        VkPipelineLayout pipelineLayout;
 };
 
 /*------------------------------------------------------------------*/
