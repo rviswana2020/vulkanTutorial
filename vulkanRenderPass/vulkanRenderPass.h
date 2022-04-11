@@ -27,6 +27,7 @@ class HelloTriangleApplication {
         void createSwapchain();         // vulkan swapchain code
         void createImageViews();
         void createGraphicsPipeline();
+        void createRenderPass();
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
@@ -46,7 +47,9 @@ class HelloTriangleApplication {
         VkFormat swapchainImageFormat;
         VkExtent2D swapchainExtent;
         std::vector<VkImageView> swapchainImageViews;
+		VkRenderPass renderPass;
         VkPipelineLayout pipelineLayout;
+		VkPipeline graphicsPipeline;
 };
 
 /*------------------------------------------------------------------*/
