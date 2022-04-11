@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <set>
 #include <algorithm>
+#include <fstream>
 
 /*------------------------------------------------------------------*/
 // Constants
@@ -545,6 +546,64 @@ chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, GLFWwindow* windo
 
 /*------------------------------------------------------------------*/
 
+static std::vector<char>
+readFile(const std::string &filename) {
+    // std::ios::ate -> start reading at the end of the file
+    // std::ios::binary - read the file as binary file
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    // check if the file can be opened
+    if(!file.is_open()) {
+        throw std::runtime_error("failed to open shader file!!!");
+    }
+
+    size_t fileSize = static_cast<size_t>(file.tellg());
+    std::vector<char> buffer(fileSize);
+
+    // move to front and read entire content
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+
+    //close the file
+    file.close();
+
+    assert(fileSize == buffer.size());
+
+    return buffer;
+}
+
+/*------------------------------------------------------------------*/
+
+static VkShaderModule
+createShaderModule(VkDevice &device, const std::vector<char> &code) {
+    // wrap the shader code in a VkShaderModule object
+
+    // NOTE: the size of the bytecode is specified in bytes
+    // bytecode pointer is a uint32_t pointer rather than char.
+    // so use reinterpret_cast
+
+    VkShaderModuleCreateInfo createInfo {};
+
+        //structure type
+        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+
+        // shader code size and buffer pointer
+        createInfo.codeSize = code.size();
+        createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+
+    // create shader module
+    VkShaderModule shaderModule = VK_NULL_HANDLE;
+
+    VkResult result = vkCreateShaderModule(device, &createInfo, nullptr,
+                                           &shaderModule);
+
+    if(result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shader module!");
+    }
+
+    return shaderModule;
+}
+
 /*------------------------------------------------------------------*/
 // Private inferface definitions
 /*------------------------------------------------------------------*/
@@ -956,6 +1015,42 @@ HelloTriangleApplication::createImageViews() {
 /*------------------------------------------------------------------*/
 
 void
+HelloTriangleApplication::createGraphicsPipeline() {
+
+    // vertex and fragment shader code
+    auto vertShaderCode = readFile("shaders/vert.spv");
+    auto fragShaderCode = readFile("shaders/frag.spv");
+
+    // create shader module
+    VkShaderModule vertShaderModule = createShaderModule(device, vertShaderCode);
+    VkShaderModule fragShaderModule = createShaderModule(device, fragShaderCode);
+
+    //assign shaders to pipeline stages
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo {};
+        vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertShaderStageInfo.module = vertShaderModule;
+        vertShaderStageInfo.pName = "main";
+        
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo {};
+        fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragShaderStageInfo.module = fragShaderModule;
+        fragShaderStageInfo.pName = "main";
+    
+    VkPipelineShaderStageCreateInfo shaderStages[] = {
+                                            vertShaderStageInfo,
+                                            fragShaderStageInfo };
+
+    // destroy shader module
+    vkDestroyShaderModule(device, fragShaderModule, nullptr);
+    vkDestroyShaderModule(device, vertShaderModule, nullptr);
+
+}
+
+/*------------------------------------------------------------------*/
+
+void
 HelloTriangleApplication::initVulkan() {
     initWindow();
     createVulkanInstance();
@@ -965,6 +1060,7 @@ HelloTriangleApplication::initVulkan() {
     createLogicalDevice();
     createSwapchain();
     createImageViews();
+    createGraphicsPipeline();
 }
 
 /*------------------------------------------------------------------*/

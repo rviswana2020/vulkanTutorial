@@ -26,6 +26,7 @@ class HelloTriangleApplication {
         void createSurface();           // vulkan surface creation code
         void createSwapchain();         // vulkan swapchain code
         void createImageViews();
+        void createGraphicsPipeline();
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
