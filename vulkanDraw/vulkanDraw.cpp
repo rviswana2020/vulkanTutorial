@@ -1275,6 +1275,25 @@ HelloTriangleApplication::createFramebuffers() {
 /*------------------------------------------------------------------*/
 
 void
+HelloTriangleApplication::createCommandPool() {
+    QueueFamilyIndices qFamilyIndices = findQueueFamilies(physicalDevice, surface);
+
+    VkCommandPoolCreateInfo poolInfo {};
+        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        poolInfo.queueFamilyIndex = qFamilyIndices.graphicsFamily.value();
+
+        VkResult result = vkCreateCommandPool(device, &poolInfo, nullptr,
+                                              &commandPool);
+
+        if(result != VK_SUCCESS) {
+            throw  std::runtime_error("failed to create command pool!");
+        }
+}
+
+/*------------------------------------------------------------------*/
+
+void
 HelloTriangleApplication::initVulkan() {
     initWindow();
     createVulkanInstance();
@@ -1287,6 +1306,7 @@ HelloTriangleApplication::initVulkan() {
     createRenderPass();
     createGraphicsPipeline();
     createFramebuffers();
+    createCommandPool();
 }
 
 /*------------------------------------------------------------------*/
@@ -1302,6 +1322,9 @@ HelloTriangleApplication::mainLoop() {
 
 void
 HelloTriangleApplication::cleanup() {
+    // destroy commandpool
+    vkDestroyCommandPool(device, commandPool, nullptr);
+
     // destroy framebuffers
     for(auto framebuffer : swapchainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
