@@ -30,6 +30,8 @@ class HelloTriangleApplication {
         void createRenderPass();
         void createFramebuffers();
         void createCommandPool();
+        void createCommandBuffer();
+        void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIdx);
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
@@ -54,6 +56,7 @@ class HelloTriangleApplication {
         VkPipeline graphicsPipeline;
         std::vector<VkFramebuffer> swapchainFramebuffers;
         VkCommandPool commandPool;
+        VkCommandBuffer commandBuffer;
 };
 
 /*------------------------------------------------------------------*/

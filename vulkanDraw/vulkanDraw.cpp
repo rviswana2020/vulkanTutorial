@@ -1292,6 +1292,67 @@ HelloTriangleApplication::createCommandPool() {
 }
 
 /*------------------------------------------------------------------*/
+void
+HelloTriangleApplication::createCommandBuffer() {
+    VkCommandBufferAllocateInfo allocInfo {};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = commandPool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+
+        VkResult result = vkAllocateCommandBuffers(device, &allocInfo,
+                                                   &commandBuffer);
+
+    if(result != VK_SUCCESS) {
+       throw std::runtime_error("failed to allocate command buffers!");
+    }
+}
+
+/*------------------------------------------------------------------*/
+
+void
+HelloTriangleApplication::recordCommandBuffer(VkCommandBuffer commandBuffer,
+                                              uint32_t imageIdx) {
+    VkCommandBufferBeginInfo beginInfo {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = 0;
+        beginInfo.pInheritanceInfo = nullptr;
+
+    VkResult result = vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    if(result != VK_SUCCESS) {
+        throw std::runtime_error("failed to begin recording command buffer!");
+    }
+
+    // start the render pass
+    VkRenderPassBeginInfo renderPassInfo {};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.framebuffer = swapchainFramebuffers[imageIdx];
+
+    renderPassInfo.renderArea.offset = {0,0};
+    renderPassInfo.renderArea.extent = swapchainExtent;
+
+    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    //Basic draw commands
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+    vkCmdEndRenderPass(commandBuffer);
+
+    result = vkEndCommandBuffer(commandBuffer);
+
+    if(result != VK_SUCCESS) {
+        throw std::runtime_error("failed to record command buffer!");
+    }
+}
+/*------------------------------------------------------------------*/
 
 void
 HelloTriangleApplication::initVulkan() {
