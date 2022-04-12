@@ -32,6 +32,8 @@ class HelloTriangleApplication {
         void createCommandPool();
         void createCommandBuffer();
         void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIdx);
+        void createSyncObjects();
+        void drawFrame();
         void initVulkan();              // vulkan init code
         void mainLoop();                // main rendering loop
         void cleanup();                 // cleanup/release all glfw/vulkan objects
@@ -57,6 +59,13 @@ class HelloTriangleApplication {
         std::vector<VkFramebuffer> swapchainFramebuffers;
         VkCommandPool commandPool;
         VkCommandBuffer commandBuffer;
+        VkSemaphore imageAvailableSemaphore;  // image acquired from swapchain
+                                              // and is ready for rendering
+        VkSemaphore renderFinishedSemaphore;  // rendering finished and ready for
+                                              // presentation
+
+        VkFence inFlightFence;                // only one frame is rendered at
+                                              // a time
 };
 
 /*------------------------------------------------------------------*/
