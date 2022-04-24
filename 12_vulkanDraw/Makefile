@@ -16,6 +16,7 @@ vulkanDraw: vulkanDraw.cpp
 .PHONY: test clean
 
 test: vulkanDraw
+	./compileShaders.sh
 	./vulkanDraw
 
 clean:

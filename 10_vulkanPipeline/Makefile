@@ -16,6 +16,7 @@ vulkanPipeline: vulkanPipeline.cpp
 .PHONY: test clean
 
 test: vulkanPipeline
+	./compileShaders.sh
 	./vulkanPipeline
 
 clean:

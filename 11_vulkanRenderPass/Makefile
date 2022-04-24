@@ -16,6 +16,7 @@ vulkanRenderPass: vulkanRenderPass.cpp
 .PHONY: test clean
 
 test: vulkanRenderPass
+	./compileShaders.sh
 	./vulkanRenderPass
 
 clean:
