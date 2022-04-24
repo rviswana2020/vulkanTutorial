@@ -18,7 +18,7 @@ static const char * INTENT_STR     = "...";
 
 static const uint32_t WIDTH     = 800;
 static const uint32_t HEIGHT    = 600;
-static const char * TITLE       = "Hello Triangle Application";
+static const char * TITLE       = "11_vulkanRenderPass";
 
 // construct validation layer name array
 std::vector<const char *> validationLayer = {

@@ -3,7 +3,7 @@
 // Window name and dimension
 static const uint32_t WIDTH  = 800;
 static const uint32_t HEIGHT = 600;
-static const char *TITLE     = "vulkan";
+static const char *TITLE     = "01_vulkanWindow";
 
 /*------------------------------------------------------------------*/
 // Public interface definition
